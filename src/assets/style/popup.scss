@@ -1,0 +1,23 @@
+@import './variables';
+
+.user-popup {
+    .user-popup-title {
+        text-align: center;
+        padding: 0 24px 16px;
+    }
+    .user-popup-paper {
+        padding: 26px;
+        .user-details-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            &> * {
+                margin: 4px;
+            }
+            .user-popup-button {
+                background-color: $primaryColor;
+                color: white;
+            }
+        }
+    }
+}

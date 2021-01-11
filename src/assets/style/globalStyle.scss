@@ -1,0 +1,149 @@
+@import './variables';
+
+@mixin flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body {
+    margin: 0;
+}
+
+.navbar-container {
+    height: 100vh;
+    .app-navbar {
+        background-color: $primaryBGColor;
+        color: white;
+        .navbar-title {
+            font-weight: 600;
+            cursor: pointer;
+        }
+    }
+    .stream-loader-wrapper {
+        .stream-loader {
+            left: 50%;
+            top: 50vh;
+            position: absolute;
+            width: 40px !important;
+            height: 40px !important;
+            color: $primaryColor;
+        }
+    }
+    #room-container {
+        background-color: black;
+        display: grid;
+        height: calc(100vh - 64px);
+        grid-gap: 6px 6px;
+        grid-template-columns: repeat(auto-fit, minmax(400px, auto));
+        grid-template-rows: repeat(auto-fit, minmax(100px, auto));
+        &>* {
+            width: 100%;
+            height: 100%;
+        }
+        video {
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+            width: 100%;
+            height: 100%;
+        }
+        .display-media {
+            -webkit-transform: scaleX(1);
+            transform: scaleX(1);
+        }
+        
+    }
+    .main-container {
+        .join-button-wrap {
+            // background-image: url('../images/bg.png');
+            @include flex-container();
+            height: calc(100vh - 64px);
+            .join-button {
+                border: 3px solid black;
+                color: white;
+                background-color: $primaryColor;
+                height: 46px;
+            }
+            .btn-circular-loader {
+                color: white;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-top: 20px;
+                margin-left: -12px;
+                color: $primaryColor;
+            }
+            .form-quality {
+                left: 55px;
+                .form-select {
+                    width: 118px;
+                }
+            }
+        }
+    }
+    .footbar-wrapper {
+        @include flex-container();
+        justify-content: space-between;
+        top: unset;
+        bottom: 0;
+        position: relative;
+        background-color: white;
+        min-width: 200px;
+        max-width: 100%;
+        .footbar-tool {
+            width: 100%;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            .footbar-title {
+                left: 26px;
+                position: relative;
+                font-family: sans-serif;
+                color: $primaryColor;
+                font-size: 22px;
+                font-weight: 600;
+                text-shadow: 1px 1px #bcbcbc;
+            }
+        }
+        .status-action-btn {
+            display: flex;
+            cursor: pointer;
+            padding: 16px;
+            box-shadow: 0 0 4px 0px black;
+            border-radius: 6px;
+            &:hover {
+                opacity: 0.8;
+                box-shadow: 0 0 4px 1px black;
+            }
+        }
+        .end-call-btn {
+            background-color: red;
+            margin: auto;
+        }
+        .mic-btn, .cam-btn {
+            color: black;
+        }
+        .chat-btn {
+            color: $primaryColor;
+            width: 40px;
+            cursor: pointer;
+        }
+        .screen-share-btn {
+            color: $primaryColor;
+            cursor: pointer;
+            position: absolute;
+            right: 60px;
+        }
+        .screen-share-btn {
+            .screen-share-btn-text {
+                font-family: sans-serif;
+                margin: 0;
+            }
+        }
+    }
+}
+.module-loader {
+    position: absolute;
+    margin-left: 50%;
+    margin-top: 50vh;
+}
