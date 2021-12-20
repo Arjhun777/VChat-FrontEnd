@@ -17,17 +17,17 @@ class SocketConnection {
     isSocketConnected:boolean = false;
     isPeersConnected:boolean = false;
     myID:string = '';
-
+    
     constructor(settings:any) {
         this.settings = settings;
         this.myPeer = initializePeerConnection();
         this.socket = initializeSocketConnection();
-        if (this.socket) this.isSocketConnected = true; 
+        if (this.socket) this.isSocketConnected = true;
         if (this.myPeer) this.isPeersConnected = true;
-        this.initializeSocketEvents();
         this.initializePeersEvents();
+        this.initializeSocketEvents();
     }
-
+    
     initializeSocketEvents = () => {
         this.socket.on('connect', () => {
             console.log('socket connected');
@@ -56,9 +56,9 @@ class SocketConnection {
         //     changeMediaView(data.id, data.status);
         // });
     }
-
+    
     initializePeersEvents = () => {
-        this.myPeer.on('open', (id) => {
+        this.myPeer.on('open', async (id) => {
             const { userDetails } = this.settings;
             this.myID = id;
             const roomID = window.location.pathname.split('/')[2];
@@ -67,26 +67,25 @@ class SocketConnection {
             }
             console.log('peers established and joined room', userData);
             this.socket.emit('join-room', userData);
-            this.setNavigatorToStream();
+            await this.setNavigatorToStream();
         });
         this.myPeer.on('error', (err:Error) => {
             console.log('peer connection error', err);
             this.myPeer.reconnect();
         })
     }
-
-    setNavigatorToStream = () => {
-        this.getVideoAudioStream().then((stream:MediaStream) => {
-            if (stream) {
-                this.streaming = true;
-                this.settings.updateInstance('streaming', true);
-                this.createVideo({ id: this.myID, stream });
-                this.setPeersListeners(stream);
-                this.newUserConnection(stream);
-            }
-        })
+    
+    setNavigatorToStream = async () => {
+        const stream: MediaStream = await this.getVideoAudioStream()
+        if (stream) {
+            this.streaming = true;
+            this.settings.updateInstance('streaming', true);
+            this.createVideo({ id: this.myID, stream });
+            this.setPeersListeners(stream);
+            this.newUserConnection(stream);
+        }
     }
-
+    
     getVideoAudioStream = (video:boolean=true, audio:boolean=true) => {
         let quality = this.settings.params?.quality;
         if (quality) quality = parseInt(quality);
@@ -102,7 +101,7 @@ class SocketConnection {
             audio: audio,
         });
     }
-
+    
     setPeersListeners = (stream:MediaStream) => {
         this.myPeer.on('call', (call:any) => {
             call.answer(stream);
@@ -120,14 +119,14 @@ class SocketConnection {
             peers[call.metadata.id] = call;
         });
     }
-
+    
     newUserConnection = (stream:MediaStream) => {
         this.socket.on('new-user-connect', (userData:any) => {
             console.log('New User Connected', userData);
             this.connectToNewUser(userData, stream);
         });
     }
-
+    
     connectToNewUser(userData:any, stream:MediaStream) {
         const { userID } = userData;
         const call = this.myPeer.call(userID, stream, { metadata: { id: this.myID } });
@@ -144,13 +143,13 @@ class SocketConnection {
         })
         peers[userID] = call;
     }
-
+    
     boradcastMessage = (message: Object) => {
         this.message.push(message);
         this.settings.updateInstance('message', this.message);
         this.socket.emit('broadcast-message', message);
     }
-
+    
     createVideo = (createObj:CreateVideo) => {
         if (!this.videoContainer[createObj.id]) {
             this.videoContainer[createObj.id] = {
@@ -170,7 +169,7 @@ class SocketConnection {
             document.getElementById(createObj.id)?.srcObject = createObj.stream;
         }
     }
-
+    
     reInitializeStream = (video?:boolean, audio?:boolean, type:string='userMedia') => {
         // @ts-ignore
         const media = type === 'userMedia' ? this.getVideoAudioStream(video, audio) : navigator.mediaDevices.getDisplayMedia();
@@ -196,7 +195,7 @@ class SocketConnection {
         const video = document.getElementById(id);
         if (video) video.remove();
     }
-
+    
     destoryConnection = () => {
         const myMediaTracks = this.videoContainer[this.myID]?.stream.getTracks();
         myMediaTracks?.forEach((track:any) => {
@@ -205,11 +204,11 @@ class SocketConnection {
         socketInstance?.socket.disconnect();
         this.myPeer.destroy();
     }
-
+    
     getMyVideo = (id:string=this.myID) => {
         return document.getElementById(id);
     }
-
+    
     listenToEndStream = (stream:MediaStream, status:MediaStatus) => {
         const videoTrack = stream.getVideoTracks();
         if (videoTrack[0]) {
@@ -221,7 +220,7 @@ class SocketConnection {
             }
         }
     };
-
+    
     toggleVideoTrack = (status:MediaStatus) => {
         const myVideo = this.getMyVideo();
         // @ts-ignore
@@ -239,17 +238,17 @@ class SocketConnection {
             this.reInitializeStream(status.video, status.audio);
         }
     }
-
+    
     toggleAudioTrack = (status:MediaStatus) => {
         const myVideo = this.getMyVideo();
         // @ts-ignore
         if (myVideo) myVideo.srcObject?.getAudioTracks().forEach((track:any) => {
             if (track.kind === 'audio')
                 track.enabled = status.audio;
-                status.audio ? this.reInitializeStream(status.video, status.audio) : track.stop();
+            status.audio ? this.reInitializeStream(status.video, status.audio) : track.stop();
         });
     }
-
+    
 }
 
 const initializePeerConnection = () => {
@@ -261,8 +260,8 @@ const initializePeerConnection = () => {
 
 const initializeSocketConnection = () => {
     return openSocket.connect(websocket, {
-        secure: true, 
-        reconnection: true, 
+        secure: true,
+        reconnection: true,
         rejectUnauthorized: false,
         reconnectionAttempts: 10
     });
@@ -286,9 +285,9 @@ const replaceStream = (mediaStream:MediaStream) => {
 }
 
 const checkAndAddClass = (video?:any, type:string='userMedia') => {
-    if (video?.classList?.length === 0 && type === 'displayMedia')  
+    if (video?.classList?.length === 0 && type === 'displayMedia')
         video.classList.add('display-media');
-    else 
+    else
         video.classList.remove('display-media');
 }
 
